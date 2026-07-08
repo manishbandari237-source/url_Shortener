@@ -56,8 +56,8 @@ def create_short_url(request: Request, url_request: URLRequest):
     db.commit()
     db.close()
     redis.set(short_code, url_request.long_url, ex=3600)
-    return {"short_code": short_code, "short_url": f"http://localhost:8000/{short_code}"}
-
+    base_url = str(request.base_url).rstrip("/")
+return {"short_code": short_code, "short_url": f"{base_url}/{short_code}"}
 @app.get("/{short_code}")
 def redirect_to_long_url(short_code: str):
     cached_url = redis.get(short_code)
