@@ -12,6 +12,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from fastapi import Request
+from fastapi import HTTPException
 
 load_dotenv()
 redis = Redis(url=os.getenv("UPSTASH_REDIS_REST_URL"), token=os.getenv("UPSTASH_REDIS_REST_TOKEN"))
@@ -68,7 +69,7 @@ def redirect_to_long_url(short_code: str):
     result = db.query(URLMapping).filter(URLMapping.short_code == short_code).first()
     db.close()
     if not result:
-        return {"error": "Short URL not found"}
+    	raise HTTPException(status_code=404, detail="Short URL not found")
 
     redis.set(short_code, result.long_url, ex=3600)
     return RedirectResponse(url=result.long_url)
